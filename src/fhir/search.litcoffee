@@ -88,6 +88,56 @@ Then we are returning  resulting Bundle.
 
       resources.map((res)-> search_elements.elements(res, sel))
 
+    exports.fhir_search_view = (plv8, query)->
+     if query.viewName &&
+       !pg_meta.table_exists(
+         plv8,
+         namings.table_name(plv8, query.viewName)
+       )
+       return outcome.unknown_type(query.viewName)
+
+     idx_db = ensure_index(plv8)
+     query.resourceType = query.viewName
+     res = _search_sql(plv8, idx_db, query)
+     honey = res.hsql
+     expr = res.query
+
+     resource_rows = utils.exec(plv8, honey)
+     resources = resource_rows.map((x)-> compat.parse(plv8, x.resource))
+     count = utils.exec(plv8, countize_query(honey))[0].count
+
+     base_url = "#{query.viewName}/#{query.queryString}"
+
+     if expr.summary or expr.elements
+       resources = mask_resources(plv8, expr, idx_db, resources)
+
+     if expr.include && count > 0
+       includes = search_include.load_includes(plv8, expr.include, resources)
+       resources = resources.concat(includes)
+
+     if expr.revinclude && count > 0
+       includes = search_include.load_revincludes(plv8, expr.revinclude, resources)
+       resources = resources.concat(includes)
+
+
+     resourceType: 'Bundle'
+     type: 'searchset'
+     total: count
+     link: helpers.search_links(query, expr, count)
+     entry: resources.map(to_entry)
+
+Helper function to convert resource into entry bundle:
+TODO: add links
+
+    to_entry = (resource)->
+     resource: helpers.postprocess_resource(resource)
+
+This function should be visible from postgresql, so
+we have to describe it signature:
+
+    exports.fhir_search_view.plv8_signature = ['json', 'json']
+
+
     exports.fhir_search = (plv8, query)->
       if query.resourceType &&
          !pg_meta.table_exists(
