@@ -214,27 +214,6 @@ fhir_read_resource = _build [
 exports.fhir_read_resource = fhir_read_resource
 exports.fhir_read_resource.plv8_signature = ['json', 'json']
 
-fhir_read_view = _build [
-    [wrap_required_attributes, [['viewName']]]
-    [wrap_postprocess]
-  ],(plv8, query)->
-
-  viewName = namings.table_name(plv8, query.viewName || (query.resource && query.resource.viewName ))
-  unless pg_meta.table_exists(plv8, viewName)
-    return table_not_exists(viewName)
-  else
-    query.viewName = viewName
-
-  res = utils.exec plv8,
-    select: ':*'
-    from: sql.q(query.viewName)
-    limit: '2'
-
-  res.map((x) -> compat.parse(plv8, x.resource))
-
-exports.fhir_read_view = fhir_read_view
-exports.fhir_read_view.plv8_signature = ['json', 'json']
-
 exports.fhir_vread_resource = _build [
     [wrap_required_attributes, [['id'], ['resourceType'], ['versionId']]]
     [wrap_ensure_table]
