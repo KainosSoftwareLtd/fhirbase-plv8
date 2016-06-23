@@ -399,7 +399,6 @@ we just strip limit, offset, order and rewrite select clause:
     get_count = (plv8, honey, query_obj) ->
       if !query_obj.total_method || query_obj.total_method is "exact"
         query_obj.total_method = "exact"
-
         utils.exec(plv8, countize_query(honey))[0].count
       else if query_obj.total_method is "estimated"
         sql_query= sql(honey)
