@@ -397,11 +397,19 @@ we just strip limit, offset, order and rewrite select clause:
       q
 
     get_count = (plv8, honey, query_obj) ->
+<<<<<<< HEAD
       if !query_obj.total_method || query_obj.total_method is "exact"
         query_obj.total_method = "exact"
 
         utils.exec(plv8, countize_query(honey))[0].count
       else if query_obj.total_method is "estimated"
+=======
+      if !query_obj.total_method || query_obj.total_method is "std"
+        query_obj.total_method = "std"
+
+        utils.exec(plv8, countize_query(honey))[0].count
+      else if query_obj.total_method is "improved"
+>>>>>>> DSTU2
         sql_query= sql(honey)
         query = sql_query[0].replace /\$(\d+)/g, (match, number) ->
             if typeof sql_query[number] is "string"
@@ -416,7 +424,11 @@ we just strip limit, offset, order and rewrite select clause:
         tmp = plv8.execute(query)
         tmp[0].count_estimate
       else
+<<<<<<< HEAD
         throw new Error("Invalid value of totalMethod. only 'exact', 'estimated' and 'no' allowed.")
+=======
+        throw new Error("Invalid value of totalMethod. only 'std', 'improved' and 'no' allowed.")
+>>>>>>> DSTU2
 
 We cache FHIR meta-data index per connection using plv8 object:
 
