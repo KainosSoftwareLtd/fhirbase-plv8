@@ -14,7 +14,7 @@ exports.getter = (plv8, rt, query)->
     utils.exec plv8,
       select: sql.raw('*')
       from: sql.q(tbl_name)
-      where: {"resource->>'name'": query.name, "resource->>'base'": query.base}
+      where: {"resource->>'name'": query.name.split(".")[0], "resource->>'base'": query.base}
 
   if res.length > 1
     throw new Error("Unexpected behavior: more then one #{rt} #{JSON.stringify(query)}\n #{JSON.stringify(res.map((x)-> x.resource.id))}")
