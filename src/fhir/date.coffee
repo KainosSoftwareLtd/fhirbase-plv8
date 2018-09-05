@@ -11,7 +11,7 @@ exports.get_default_time = get_default_time
 
 extract_tz = (date)->
   tz = ''
-  log(date)
+  log("extract_tz " + date)
   date_length = date.length
   if date.indexOf('Z') == date_length - 1
     tz = 'Z'
@@ -26,9 +26,8 @@ extract_tz = (date)->
     tz = date.substring(date_length - 6, date_length)
     date = date.substring(0, date_length - 6)
   else if date.length > 10
-    tz = "+01:00" #moment.tz(moment.utc(), 'America/New_York').utcOffset()
+    tz = get_default_time(undefined, date)
   
-  log(date + ", " + tz)
   [date, tz]
 
 exports.extract_tz = extract_tz

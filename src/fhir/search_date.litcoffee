@@ -25,6 +25,8 @@ See it for more details.
     search_common = require('./search_common')
     utils = require('../core/utils')
     sql = require('../honey')
+    timezone = require('./timezone')
+    log = timezone.log
 
 
 Now we support only simple date data-types - i.e. date, dateTime and instant.
@@ -62,6 +64,7 @@ Now we support only simple date data-types - i.e. date, dateTime and instant.
 
     epoch = (plv8, value)->
       if value
+        log("epoch " + value)
         res = utils.exec plv8,
           select: sql.raw("extract(epoch from ('#{value.toString()}')::timestamp with time zone)")
         res[0].date_part

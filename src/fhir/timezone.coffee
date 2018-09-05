@@ -35,11 +35,24 @@ load_configuration_time = (plv8)->
   return row
 
 
-get_default_time = (plv8)->
+get_default_time = (plv8, date)->
   log("Get default time")
+
+  if typeof plv8 == "undefined"
+    configuration_timezone = 'Europe/London'
+  else
+    configuration_timezone = load_configuration_time(plv8)
+
+  date_moment = moment(date)
+  log(date_moment)
+  
+  offset = moment.tz(moment.utc(), configuration_timezone).utcOffset()
+
+  format_apply = moment.tz(moment.utc(), configuration_timezone).format('Z')
+
   log(moment("2013-03-01", "YYYY-MM-DD"))
-  log(moment.tz(moment.utc(), 'America/New_York').utcOffset())
-  log(moment.tz(moment.utc(), load_configuration_time(plv8)).utcOffset())
+  log(offset)
+  log(format_apply)
 
   newYork    = moment.tz("2014-06-01 12:00", "America/New_York");
   losAngeles = newYork.clone().tz("America/Los_Angeles");
@@ -48,6 +61,8 @@ get_default_time = (plv8)->
   log(newYork.format('ha z'));
   log(losAngeles.format('ha z'));
   log(london.format('ha z'));
+
+  format_apply
 
 
 
