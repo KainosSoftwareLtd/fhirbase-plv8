@@ -3,7 +3,7 @@ log = timezone.log
 
 extract_tz = (date)->
   tz = ''
-  #log("extract_tz " + date)
+  log("extract_tz " + date)
   date_length = date.length
   if date.indexOf('Z') == date_length - 1
     tz = 'Z'

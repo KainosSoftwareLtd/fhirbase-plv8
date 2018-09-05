@@ -38,12 +38,10 @@ get_default_time = (plv8, date)->
     configuration_timezone = load_configuration_time(plv8)
 
   date_moment = moment(date)
-  log(date_moment)
   
-  offset = moment.tz(moment.utc(), configuration_timezone).utcOffset()
-  format_apply = moment.tz(moment.utc(), configuration_timezone).format('Z')
+  format_apply = moment.tz(date_moment, configuration_timezone).format('Z')
 
-  log(configuration_timezone + " " + format_apply)
+  log("get_default_time " + date_moment + " format " + format_apply)
 
   format_apply
 
