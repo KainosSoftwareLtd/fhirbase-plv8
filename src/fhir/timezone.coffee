@@ -1,5 +1,5 @@
-utils = require('../../core/utils')
-sql = require('../../honey')
+utils = require('../core/utils')
+sql = require('../honey')
 
 process = (arg, i)->
   logMaxL = 90;

@@ -1,4 +1,4 @@
-timezone = require('./timezone/timezone')
+timezone = require('./timezone')
 log = timezone.log
 
 get_default_time = (plv8)->
