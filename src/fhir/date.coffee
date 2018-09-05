@@ -1,5 +1,46 @@
+utils = require('../core/utils')
+sql = require('../honey')
+
+process = (arg, i)->
+  logMaxL = 90;
+  if arg instanceof Object 
+    arg = JSON.stringify(arg)
+  if typeof arg == "string" && arg.length > logMaxL
+    overflow[i] = arg.substring(50)
+    arg = arg.substring(0, 50)
+
+  return arg
+  
+log = ()->
+  overflow = []
+  args = Array.prototype.slice.call(arguments, 0).map(process)
+  plv8.elog.apply(this, [NOTICE].concat(args))
+  if overflow.length
+    log.apply(this,overflow)
+
+get_default_time = (plv8)->
+  log("Get default time")
+
+  res = utils.exec plv8,
+    select: sql.raw('timezone')
+    from: sql.q("timezone_configuration")
+
+  log(res)
+
+  row = res[0]
+  if typeof row == "object"
+    row = row.timezone
+  
+  log(row)
+
+  return row
+
+exports.get_default_time = get_default_time
+
+
 extract_tz = (date)->
   tz = ''
+  log(date)
   date_length = date.length
   if date.indexOf('Z') == date_length - 1
     tz = 'Z'
@@ -13,7 +54,13 @@ extract_tz = (date)->
   else if date.length > 10 and date.match(/[+|-](0[0-9]|1[0-3]):[034][05]$/) # fix #72 <https://github.com/fhirbase/fhirbase-plv8/issues/72>
     tz = date.substring(date_length - 6, date_length)
     date = date.substring(0, date_length - 6)
+  else if date.length > 10
+    tz = "+01:00" #moment.tz(moment.utc(), 'America/New_York').utcOffset()
+  
+  log(date + ", " + tz)
   [date, tz]
+
+exports.extract_tz = extract_tz
 
 extract_msecs = (date, pad_with)->
   msecs = date.match(/[.][0-9]+$/)
