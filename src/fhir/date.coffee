@@ -1,17 +1,9 @@
 timezone = require('./timezone')
 log = timezone.log
 
-get_default_time = (plv8)->
-  log("Get default time")
-  log(plv8)
-
-  return timezone.get_default_time(plv8)
-
-exports.get_default_time = get_default_time
-
 extract_tz = (date)->
   tz = ''
-  log("extract_tz " + date)
+  #log("extract_tz " + date)
   date_length = date.length
   if date.indexOf('Z') == date_length - 1
     tz = 'Z'
@@ -24,13 +16,24 @@ extract_tz = (date)->
     date = date.substring(0, date_length - 5)
   else if date.length > 10 and date.match(/[+|-](0[0-9]|1[0-3]):[034][05]$/) # fix #72 <https://github.com/fhirbase/fhirbase-plv8/issues/72>
     tz = date.substring(date_length - 6, date_length)
-    date = date.substring(0, date_length - 6)
-  else if date.length > 10
-    tz = get_default_time(undefined, date)
-  
+    date = date.substring(0, date_length - 6)  
   [date, tz]
 
-exports.extract_tz = extract_tz
+is_date_with_timezone = (value)->
+  [date, timezone] = extract_tz(value)
+
+  return !!timezone 
+
+exports.is_date_with_timezone = is_date_with_timezone
+
+should_apply_default_timezone = (value)->
+  is_date = value.length <= 10
+  contains_timezone = is_date_with_timezone(value)
+
+  return !is_date && !contains_timezone
+
+exports.should_apply_default_timezone = should_apply_default_timezone
+
 
 extract_msecs = (date, pad_with)->
   msecs = date.match(/[.][0-9]+$/)

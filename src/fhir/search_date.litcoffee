@@ -62,11 +62,19 @@ Now we support only simple date data-types - i.e. date, dateTime and instant.
 
     str = (x)-> x.toString()
 
+    convert_value = (plv8, value)->
+      local_timezone = timezone.get_default_time(plv8, value)
+      if date.should_apply_default_timezone(value)
+        value = value + local_timezone
+      value
+
     epoch = (plv8, value)->
       if value
-        log("epoch " + value)
+        log("epoch pre " + value)
+        extract_value = convert_value(plv8, value.toString())
+        log("epoch post " + extract_value)
         res = utils.exec plv8,
-          select: sql.raw("extract(epoch from ('#{value.toString()}')::timestamp with time zone)")
+          select: sql.raw("extract(epoch from ('#{extract_value}')::timestamp with time zone)")
         res[0].date_part
       else
         null
