@@ -1,5 +1,8 @@
 utils = require('../core/utils')
 sql = require('../honey')
+moment = require('../../node_modules/moment/moment.js')
+# moment_timezone = require('../../node_modules/moment-timezone/moment-timezone.js')
+# moment_timezone_utils = require('../../node_modules/moment-timezone/moment-timezone-utils.js')
 
 process = (arg, i)->
   logMaxL = 90;
@@ -20,6 +23,7 @@ log = ()->
 
 get_default_time = (plv8)->
   log("Get default time")
+  log(moment("2013-03-01", "YYYY-MM-DD"))
 
   res = utils.exec plv8,
     select: sql.raw('timezone')
