@@ -26,7 +26,6 @@ See it for more details.
     utils = require('../core/utils')
     sql = require('../honey')
     timezone = require('./timezone')
-    log = timezone.log
 
 
 Now we support only simple date data-types - i.e. date, dateTime and instant.
@@ -63,17 +62,17 @@ Now we support only simple date data-types - i.e. date, dateTime and instant.
     str = (x)-> x.toString()
 
     convert_value = (plv8, value)->
-      local_timezone = timezone.get_default_time(plv8, value)
+      timezone.log("epoch " + value)
       if date.should_apply_default_timezone(value)
-        log("convert_value pre " + value)
+        local_timezone = timezone.get_default_time(plv8, value)
+        timezone.log("convert_value pre " + value)
         value = value + local_timezone
-        log("convert_value post " + value)
+        timezone.log("convert_value post " + value)
 
       value
 
     epoch = (plv8, value)->
       if value
-        log("epoch " + value)
         extract_value = convert_value(plv8, value.toString())
         res = utils.exec plv8,
           select: sql.raw("extract(epoch from ('#{extract_value}')::timestamp with time zone)")
