@@ -12,7 +12,7 @@ extract_tz = (date)->
     date = date.substring(0, date_length - 5)
   else if date.length > 10 and date.match(/[+|-](0[0-9]|1[0-3]):[034][05]$/) # fix #72 <https://github.com/fhirbase/fhirbase-plv8/issues/72>
     tz = date.substring(date_length - 6, date_length)
-    date = date.substring(0, date_length - 6)  
+    date = date.substring(0, date_length - 6)
   [date, tz]
 
 is_date_with_timezone = (value)->
@@ -22,14 +22,11 @@ is_date_with_timezone = (value)->
 
 exports.is_date_with_timezone = is_date_with_timezone
 
-should_apply_default_timezone = (value)->
+exports.should_apply_default_timezone = (value)->
   is_date = value.length <= 10
   contains_timezone = is_date_with_timezone(value)
 
   return !is_date && !contains_timezone
-
-exports.should_apply_default_timezone = should_apply_default_timezone
-
 
 extract_msecs = (date, pad_with)->
   msecs = date.match(/[.][0-9]+$/)

@@ -62,12 +62,9 @@ Now we support only simple date data-types - i.e. date, dateTime and instant.
     str = (x)-> x.toString()
 
     convert_value = (plv8, value)->
-      timezone.log("epoch " + value)
       if date.should_apply_default_timezone(value)
         local_timezone = timezone.get_default_time(plv8, value)
-        timezone.log("convert_value pre " + value)
         value = value + local_timezone
-        timezone.log("convert_value post " + value)
 
       value
 
