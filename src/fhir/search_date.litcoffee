@@ -68,6 +68,12 @@ Now we support only simple date data-types - i.e. date, dateTime and instant.
 
       value
 
+    exports.fhir_apply_timezone_if_needed = convert_value
+    exports.fhir_apply_timezone_if_needed.plv8_signature =
+      arguments: ['text']
+      returns: 'text'
+      immutable: true
+
     epoch = (plv8, value)->
       if value
         extract_value = convert_value(plv8, value.toString())
