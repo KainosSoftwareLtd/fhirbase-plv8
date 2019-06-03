@@ -32,6 +32,8 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
 
     sf = search_common.get_search_functions({extract:'fhir_extract_as_token', sort:'fhir_sort_as_token',SUPPORTED_TYPES:SUPPORTED_TYPES})
     extract_expr = sf.extract_expr
+    sf2 = search_common.get_search_functions({extract: 'fhir_extract_as_uri'})
+    extract_as_uri = sf2.extract_expr
 
     exports.order_expression = sf.order_expression
     exports.index_order = sf.index_order
@@ -80,8 +82,8 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
         else if data.elementType == 'CodeableConcept'
           for concept in data.value
             for coding in (concept.coding || [])
-              res.push(coding.code.toString().toLowerCase()) if coding.code
-              res.push("#{coding.system}|#{coding.code}".toLowerCase())
+              res.push(coding.code.toString()) if coding.code
+              res.push("#{coding.system}|#{coding.code}")
         else if data.elementType == 'Reference'
           for ref in data.value
             res.push(ref.reference)
@@ -139,12 +141,17 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
       eq: (tbl, metas, value)->
         ["$&&"
           ['$cast', extract_expr(metas, tbl), ":text[]"]
-          ['$cast', ['$array', value.value.toString().toLowerCase()], ":text[]"]]
+          ['$cast', ['$array', value.value.toString()], ":text[]"]]
 
+      in: (tbl, metas, value)->
+        ["$&&"
+          ['$cast', extract_expr(metas, tbl), ":text[][2]"]
+          ['$raw', "(SELECT array_agg(system || '|' || code) FROM _valueset_expansion WHERE valueset_id IN (SELECT id FROM valueset WHERE resource ->> 'url' = '" + value.value.toString() + "'))"]]
 
     exports.normalize_operator = (meta, value)->
       return 'eq' if not meta.modifier and not value.prefix
       return 'missing' if meta.modifier == 'missing'
+      return 'in' if meta.modifier == 'in'
       throw new Error("Not supported operator #{JSON.stringify(meta)} #{JSON.stringify(value)}")
 
     exports.handle = (tbl, metas, value)->
