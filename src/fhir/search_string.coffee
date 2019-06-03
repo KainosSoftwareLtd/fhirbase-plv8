@@ -103,11 +103,16 @@ exports.fhir_sort_as_string.plv8_signature =
 normalize_string_value = (x)->
   x && unaccent(x.trim().toLowerCase().toString())
 
+normalize_string_value_case_sensitive = (x)->
+  x && unaccent(x.trim().toString())
+
 SUPPORTED_TYPES = [
   'Address'
   'ContactPoint'
   'HumanName'
-  'string'
+  'string',
+  'id',
+  'code'
 ]
 
 sf = search_common.get_search_functions({extract:'fhir_extract_as_string', sort:'fhir_sort_as_string',SUPPORTED_TYPES:SUPPORTED_TYPES})
@@ -119,6 +124,8 @@ exports.index_order = sf.index_order
 OPERATORS =
   eq: (tbl, metas, value)->
     ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value(value.value)}$$%"]
+  cs: (tbl, metas, value)->
+    ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value_case_sensitive(value.value)}$$%"]
   sw: (tbl, metas, value)->
     ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value(value.value)}%"]
   ew: (tbl, metas, value)->
@@ -133,6 +140,7 @@ OPERATORS =
 
 OPERATORS_ALIASES =
   exact: 'eq'
+  cs: 'cs'
   contains: 'co'
   sw: 'sw'
   ew: 'ew'
@@ -151,7 +159,6 @@ handle = (tbl, metas, value)->
     unless SUPPORTED_TYPES.indexOf(m.elementType) > -1
       throw new Error("String Search: unsupported type #{JSON.stringify(m)}")
   op = OPERATORS[metas[0].operator]
-
   unless op
     throw new Error("String Search: Unsupported operator #{JSON.stringify(metas)}")
 
