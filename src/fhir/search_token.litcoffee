@@ -140,18 +140,25 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
 
       eq: (tbl, metas, value)->
         ["$&&"
-          ['$cast', extract_expr(metas, tbl), ":text[]"]
-          ['$cast', ['$array', value.value.toString()], ":text[]"]]
+          ['$cast', extract_expr(metas, tbl), ":citext[]"]
+          ['$cast', ['$array', value.value.toString().toLowerCase()], ":citext[]"]]
 
       in: (tbl, metas, value)->
         ["$&&"
           ['$cast', extract_expr(metas, tbl), ":text[][2]"]
           ['$raw', "(SELECT array_agg(system || '|' || code) FROM _valueset_expansion WHERE valueset_id IN (SELECT id FROM valueset WHERE resource ->> 'url' = '" + value.value.toString() + "'))"]]
 
+      "not-in": (tbl, metas, value)->
+        ["$not"
+          ["$&&"
+            ['$cast', extract_expr(metas, tbl), ":text[][2]"]
+            ['$raw', "(SELECT array_agg(system || '|' || code) FROM _valueset_expansion WHERE valueset_id IN (SELECT id FROM valueset WHERE resource ->> 'url' = '" + value.value.toString() + "'))"]]]
+
     exports.normalize_operator = (meta, value)->
       return 'eq' if not meta.modifier and not value.prefix
       return 'missing' if meta.modifier == 'missing'
       return 'in' if meta.modifier == 'in'
+      return 'not-in' if meta.modifier == 'not-in'
       throw new Error("Not supported operator #{JSON.stringify(meta)} #{JSON.stringify(value)}")
 
     exports.handle = (tbl, metas, value)->
