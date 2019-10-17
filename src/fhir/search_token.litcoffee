@@ -32,8 +32,6 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
 
     sf = search_common.get_search_functions({extract:'fhir_extract_as_token', sort:'fhir_sort_as_token',SUPPORTED_TYPES:SUPPORTED_TYPES})
     extract_expr = sf.extract_expr
-    sf2 = search_common.get_search_functions({extract: 'fhir_extract_as_uri'})
-    extract_as_uri = sf2.extract_expr
 
     exports.order_expression = sf.order_expression
     exports.index_order = sf.index_order
@@ -50,6 +48,13 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
             elementType: meta.elementType
           }
       null
+
+    check_valueset_url_presence = (urlValue, operator)->
+      query = "SELECT COUNT(id) as id_count FROM valueset WHERE resource ->> 'url' = '#{urlValue}'"
+      result = plv8.execute(query)
+
+      if result[0].id_count == 0
+        throw new Error("Missing valueset for '#{urlValue}' for '#{operator}'.")
 
     exports.fhir_extract_as_token = (plv8, resource, metas)->
       res = []
@@ -165,6 +170,10 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
       for m in metas
         unless SUPPORTED_TYPES.indexOf(m.elementType) > -1
           throw new Error("String Search: unsupported type #{JSON.stringify(m)}")
+
+      if metas[0].operator == 'in' || metas[0].operator == 'not-in'
+        check_valueset_url_presence(value.value.toString(), metas[0].operator)
+
       op = OPERATORS[metas[0].operator]
 
       unless op
