@@ -143,10 +143,15 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
           ['$cast', extract_expr(metas, tbl), ":text[]"]
           ['$cast', ['$array', "$NULL"], ":text[]"]]
 
-      eq: (tbl, metas, value)->
+      cieq: (tbl, metas, value)->
         ["$&&"
           ['$cast', extract_expr(metas, tbl), ":citext[]"]
           ['$cast', ['$array', value.value.toString().toLowerCase()], ":citext[]"]]
+
+      eq: (tbl, metas, value)->
+        ["$&&"
+          ['$cast', extract_expr(metas, tbl), ":text[]"]
+          ['$cast', ['$array', value.value.toString().toLowerCase()], ":text[]"]]
 
       in: (tbl, metas, value)->
         ["$&&"
@@ -161,6 +166,7 @@ PostgreSQL implementation is based on arrays support - http://www.postgresql.org
 
     exports.normalize_operator = (meta, value)->
       return 'eq' if not meta.modifier and not value.prefix
+      return 'cieq' if meta.modifier == 'cieq'
       return 'missing' if meta.modifier == 'missing'
       return 'in' if meta.modifier == 'in'
       return 'not-in' if meta.modifier == 'not-in'
