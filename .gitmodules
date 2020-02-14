@@ -1,3 +1,4 @@
 [submodule "plpl"]
 	path = plpl
 	url = https://github.com/KainosSoftwareLtd/plpl.git
+	branch = kainos-develop
