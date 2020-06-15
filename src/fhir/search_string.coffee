@@ -162,7 +162,7 @@ OPERATORS =
   eq: (tbl, metas, value)->
     ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value(value.value)}$$%"]
   cs: (tbl, metas, value)->
-    ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value_case_sensitive(value.value)}$$%"]
+    ["$like", extract_expr(metas, tbl), "%^^#{normalize_string_value_case_sensitive(value.value)}$$%"]
   sw: (tbl, metas, value)->
     ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value(value.value)}%"]
   ew: (tbl, metas, value)->
