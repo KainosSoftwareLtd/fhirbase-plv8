@@ -283,7 +283,7 @@ To build search query we need to
         if expr.count != null || expr.page != null
           hsql.limit = expr.count || DEFAULT_RESOURCES_PER_PAGE
 
-        if expr.page?x
+        if expr.page?
           hsql.offset = (expr.count || DEFAULT_RESOURCES_PER_PAGE) * expr.page
 
         if expr.offset?
