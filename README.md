@@ -71,6 +71,90 @@ unzip fhirbase-<version of the fhirbase>-patch.sql.zip
 cat fhirbase-<version of the fhirbase>-patch.sql | psql fhirbase
 ```
 
+## Kainos development and update process
+
+You will need to make changes to the fhirbase code from time to time. Here is how you should perform update process.
+
+The original "Development Installation" chapter mentions that you should have node v6.2.0, however, it was tested that the installation process is successful on newer node versions (e.g. v12.18.0).
+
+1. Clone the repository and initialise its submodules:
+    ```shell script
+    git clone https://github.com/fhirbase/fhirbase-plv8
+    cd fhirbase-plv8
+    git submodule init && git submodule update
+    ```
+2. Install dependencies:
+    ```shell script
+    cd plpl && npm install && cd .. && npm install
+    npm install -g mocha && npm install -g coffee-script
+    ```
+3. Implement required changes in the fhirbase coffee scripts and commit them.
+4. Run the script `./build-commit.sh`. The script compiles the Coffee scripts and generates a bunch of SQL files from them in the `build/current-commit-hash` directory. The one that is the most interesting for us is the `code.sql`.
+5. The `code.sql` script contains some unnecessary comments and expressions creating modules using an your local absolute path where the repository is cloned, e.g. `_modules["/Users/bartlomiejs/work/fhirbase-plv8/src/core"]`. To clear the SQL file adjust and run the following command:
+    ```shell script
+    cat code.sql \
+        | sed "s/\/Users\/bartlomiejs\/work//g" \
+        | sed "/\/\/# sourceMappingURL.*/d" \
+        | sed "/\/\/# sourceURL.*/d" \
+        >> clean-code.sql
+    ```
+6. Copy the block of code that recreates `plv8_init` function
+    ```sql
+    CREATE OR REPLACE FUNCTION plv8_init() RETURNS text AS $JAVASCRIPT$
+    --
+    -- Code goes here
+    --
+    $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE STRICT;
+    ```
+    and place it as the new migration file (e.g. `V15_0_0__recreate_plv8init_with_fhir_extract_as_string_array_method_added.sql`) in the `fhir-service/db/schema/public` directory.
+7. Check the diff between the new migration file and the previous one updating `plv8_init` function and validate if all changes you applied in the coffee scripts have the corresponding code in the new migration.
+8. If everything is correct copy the migration file to the tenant migrations directory `fhir-service/db/schema/tenant`. Make sure you update the version number (`V15_0_0` part) so that it is the latest tenant migration version.
+9. If you have added a new coffee script function or updated the name of already existing one you should add a migration that creates a Postgresql function in both public and tenant schemas.
+   - Migration added to `fhir-service/db/schema/public` directory. Please, note that we are creating two functions that refer to the same coffee script function. The latter definition (with the `_withplv8` suffix) is a workaround for autovacuum issue and it will be used in the tenant migration. 
+        ```sql
+        DROP FUNCTION IF EXISTS fhir_extract_as_string_array(resource json, metas json) CASCADE;
+        CREATE OR REPLACE FUNCTION
+        fhir_extract_as_string_array(resource json, metas json)
+        RETURNS text[] AS $JAVASCRIPT$
+          var mod = require("/fhirbase-plv8/src/fhir/search_string.coffee")
+          return mod.fhir_extract_as_string_array(plv8, resource, metas)
+        $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE;
+        
+        
+        DROP FUNCTION IF EXISTS public.fhir_extract_as_string_array_withplv8(resource json, metas json) CASCADE;
+        CREATE OR REPLACE FUNCTION
+        public.fhir_extract_as_string_array_withplv8(resource json, metas json)
+        RETURNS text[] AS $JAVASCRIPT$
+          var mod = require("/fhirbase-plv8/src/fhir/search_string.coffee")
+          return mod.fhir_extract_as_string_array(plv8, resource, metas)
+        $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE;
+        ```
+   - Migration added to `fhir-service/db/schema/tenant` directory:
+        ```sql
+        DROP FUNCTION IF EXISTS fhir_extract_as_string_array(resource json, metas json) CASCADE;
+        CREATE OR REPLACE FUNCTION
+        fhir_extract_as_string_array(resource json, metas json)
+        RETURNS text[]
+         LANGUAGE sql
+         IMMUTABLE
+        AS $function$
+          SELECT set_config('plv8.start_proc', 'public.plv8_init', false);
+          SELECT public.fhir_extract_as_string_array_withplv8(resource, metas)
+        $function$;
+        ```  
+    
+**Note:** If you have changed a function that is used for creating indexes, you must regenerate those indexes.
+
+## Troubleshooting
+
+1. To compile the coffee scripts smoothly, you'll require XCode to be installed on your local machine. However, even if the XCode is installed you can encounter the problems with the `node-gyp` library:
+   - `gyp: No Xcode or CLT version detected!` or
+   - `xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance`
+   
+   To fix this issue follow the steps:
+   - [Remove already existing XCode installation](https://medium.com/flawless-app-stories/gyp-no-xcode-or-clt-version-detected-macos-catalina-anansewaa-38b536389e8d)
+   - Follow [one of the solutions](https://github.com/nodejs/node-gyp/blob/master/macOS_Catalina.md#solutions) provided by `node-gyp` maintainers. You can try with the second solution (reinstalling Xcode Command Line Tools) but in my case even if the "acid test" has passed `node-gyp` still didn't work, so be ready for the first solution, i.e. installing the full XCode and waiting a long time until it is downloaded.
+
 ## Development Installation
 
 Development installation requires node v6.2.0 or newer

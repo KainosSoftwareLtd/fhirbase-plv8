@@ -1,3 +1,4 @@
 [submodule "plpl"]
 	path = plpl
-	url = https://github.com/fhirbase/plpl.git
+	url = https://github.com/KainosSoftwareLtd/plpl.git
+	branch = gccg-develop

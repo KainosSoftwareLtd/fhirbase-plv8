@@ -59,6 +59,43 @@ exports.fhir_extract_as_string.plv8_signature =
   returns: 'text'
   immutable: true
 
+exports.fhir_extract_as_string_array = (plv8, resource, metas)->
+  value = extract_value(resource, metas)
+  vals = []
+
+  if value
+    if INDEXABLE_ATTRIBUTES[value.elementType]
+      collectValsFn = (o) ->
+        result = []
+        for k, v of o
+          if INDEXABLE_ATTRIBUTES[value.elementType].indexOf(k) >= 0
+            if Array.isArray(v)
+              result = result.concat(v)
+            else
+              result.push(v)
+        result
+
+      if Array.isArray(value.value)
+        for v in value.value
+          vals = vals.concat(collectValsFn(v))
+      else
+        vals = collectValsFn(value.value)
+    else
+      vals = lang.values(value.value)
+
+  vals = vals.filter((x)-> x && x.toString().trim().length > 0)
+  vals = vals.map((x) -> "^^#{unaccent(x.toString())}$$")
+
+  if vals.length == 0
+    [EMPTY_VALUE]
+  else
+    vals
+
+exports.fhir_extract_as_string_array.plv8_signature =
+  arguments: ['json', 'json']
+  returns: 'text[]'
+  immutable: true
+
 exports.fhir_sort_as_string = (plv8, resource, metas)->
   value = extract_value(resource, metas)
   return null unless value
@@ -125,7 +162,7 @@ OPERATORS =
   eq: (tbl, metas, value)->
     ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value(value.value)}$$%"]
   cs: (tbl, metas, value)->
-    ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value_case_sensitive(value.value)}$$%"]
+    ["$like", extract_expr(metas, tbl), "%^^#{normalize_string_value_case_sensitive(value.value)}$$%"]
   sw: (tbl, metas, value)->
     ["$ilike", extract_expr(metas, tbl), "%^^#{normalize_string_value(value.value)}%"]
   ew: (tbl, metas, value)->
