@@ -6,7 +6,7 @@
   "devDependencies": {
     "coffee": "latest",
     "coffee-script": "latest",
-    "fast-json-patch": "latest",
+    "fast-json-patch": "1.1.5",
     "js-yaml": "latest",
     "jsedn": "latest",
     "mocha": "latest",
@@ -19,7 +19,7 @@
     "node": ">=6.2.0",
     "npm": ">=3.0.0"
   },
-  "homepage": "https:\/\/github.com\/niquola\/plpl",
+  "homepage": "https://github.com/niquola/plpl",
   "files": [
     "bin",
     "lib",
@@ -27,12 +27,16 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https:\/\/github.com\/niquola\/fhirbase"
+    "url": "https://github.com/niquola/fhirbase"
   },
   "scripts": {
-    "publish": "coffee -o lib\/ -c src\/ && npm publish",
-    "migrate": ".\/build-commit.sh --rebuild && cat build\/latest\/build.sql | psql $DATABASE_URL",
-    "reload": "plpl\/bin\/plpl reload",
-    "test": "node_modules\/mocha\/bin\/mocha --compilers mocha --compilers coffee:coffee-script\/register  --recursive"
+    "publish": "coffee -o lib/ -c src/ && npm publish",
+    "migrate": "./build-commit.sh --rebuild && cat build/latest/build.sql | psql $DATABASE_URL",
+    "reload": "plpl/bin/plpl reload",
+    "test": "node_modules/mocha/bin/mocha --compilers mocha --compilers coffee:coffee-script/register  --recursive"
+  },
+  "dependencies": {
+    "moment": "^2.22.2",
+    "moment-timezone": "^0.5.21"
   }
 }
