@@ -36,7 +36,7 @@
     "test": "node_modules/mocha/bin/mocha --compilers mocha --compilers coffee:coffee-script/register  --recursive"
   },
   "dependencies": {
-    "moment": "^2.22.2",
-    "moment-timezone": "^0.5.21"
+    "moment": "2.22.2",
+    "moment-timezone": "0.5.21"
   }
 }
