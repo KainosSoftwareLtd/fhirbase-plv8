@@ -15,6 +15,19 @@ extract_tz = (date)->
     date = date.substring(0, date_length - 6)
   [date, tz]
 
+is_date_with_timezone = (value)->
+  [date, timezone] = extract_tz(value)
+
+  return !!timezone 
+
+exports.is_date_with_timezone = is_date_with_timezone
+
+exports.should_apply_default_timezone = (value)->
+  is_date = value.length <= 10
+  contains_timezone = is_date_with_timezone(value)
+
+  return !is_date && !contains_timezone
+
 extract_msecs = (date, pad_with)->
   msecs = date.match(/[.][0-9]+$/)
   return [date, ".#{pad_with.substring(0,5)}"] unless msecs

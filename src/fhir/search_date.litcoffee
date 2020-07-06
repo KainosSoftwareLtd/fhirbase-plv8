@@ -25,6 +25,7 @@ See it for more details.
     search_common = require('./search_common')
     utils = require('../core/utils')
     sql = require('../honey')
+    timezone = require('./timezone')
 
 
 Now we support only simple date data-types - i.e. date, dateTime and instant.
@@ -60,10 +61,24 @@ Now we support only simple date data-types - i.e. date, dateTime and instant.
 
     str = (x)-> x.toString()
 
+    convert_value = (plv8, value)->
+      if date.should_apply_default_timezone(value)
+        local_timezone = timezone.get_default_time(plv8, value)
+        value = value + local_timezone
+
+      value
+
+    exports.fhir_apply_timezone_if_needed = convert_value
+    exports.fhir_apply_timezone_if_needed.plv8_signature =
+      arguments: ['text']
+      returns: 'text'
+      immutable: true
+
     epoch = (plv8, value)->
       if value
+        extract_value = convert_value(plv8, value.toString())
         res = utils.exec plv8,
-          select: sql.raw("extract(epoch from ('#{value.toString()}')::timestamp with time zone)")
+          select: sql.raw("extract(epoch from ('#{extract_value}')::timestamp with time zone)")
         res[0].date_part
       else
         null
