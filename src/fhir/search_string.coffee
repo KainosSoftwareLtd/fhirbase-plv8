@@ -107,7 +107,8 @@ SUPPORTED_TYPES = [
   'Address'
   'ContactPoint'
   'HumanName'
-  'string'
+  'string',
+  'id'
 ]
 
 sf = search_common.get_search_functions({extract:'fhir_extract_as_string', sort:'fhir_sort_as_string',SUPPORTED_TYPES:SUPPORTED_TYPES})
