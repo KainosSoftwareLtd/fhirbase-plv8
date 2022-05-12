@@ -117,9 +117,9 @@ module.exports.parameter = (idx, path)->
     throw new Error("MetaIndex: Path not expandable #{path.join('-')}")
 
   epathes.map (epath)->
-    epath = epath.map((x)-> if lang.isArray(x) then x[0] else x)
-    el = element(idx, epath)
-    throw new Error("MetaIndex: Element [#{JSON.stringify(path)}] -> #{epath.join('.')} not found") unless el
+    epathFirstDimensionOnly = epath.map((x)-> if lang.isArray(x) then x[0] else x)
+    el = element(idx, epathFirstDimensionOnly)
+    throw new Error("MetaIndex: Element [#{JSON.stringify(path)}] -> #{epathFirstDimensionOnly.join('.')} not found") unless el
 
     name: name
     path: epath
