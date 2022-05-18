@@ -33,6 +33,6 @@
     "publish": "coffee -o lib\/ -c src\/ && npm publish",
     "migrate": ".\/build-commit.sh --rebuild && cat build\/latest\/build.sql | psql $DATABASE_URL",
     "reload": "plpl\/bin\/plpl reload",
-    "test": "node_modules\/mocha\/bin\/mocha --compilers mocha --compilers coffee:coffee-script\/register  --recursive"
+    "test": "node_modules/mocha/bin/mocha.js --require mocha --require coffee-script/register --recursive \"test/**/*.coffee\""
   }
 }
