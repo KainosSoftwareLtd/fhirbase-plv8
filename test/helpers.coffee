@@ -7,7 +7,7 @@ exports.loadJson = (pth)->
   JSON.parse(fs.readFileSync(pth, "utf8"))
 
 exports.loadYaml = (pth)->
-  yaml.safeLoad(fs.readFileSync(pth, "utf8"))
+  yaml.load(fs.readFileSync(pth, "utf8"))
 
 edn = require("jsedn")
 
