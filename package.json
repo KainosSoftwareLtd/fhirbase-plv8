@@ -19,7 +19,7 @@
     "node": ">=6.2.0",
     "npm": ">=3.0.0"
   },
-  "homepage": "https:\/\/github.com\/niquola\/plpl",
+  "homepage": "https://github.com/niquola/plpl",
   "files": [
     "bin",
     "lib",
@@ -27,12 +27,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https:\/\/github.com\/niquola\/fhirbase"
+    "url": "https://github.com/niquola/fhirbase"
   },
   "scripts": {
-    "publish": "coffee -o lib\/ -c src\/ && npm publish",
-    "migrate": ".\/build-commit.sh --rebuild && cat build\/latest\/build.sql | psql $DATABASE_URL",
-    "reload": "plpl\/bin\/plpl reload",
+    "publish": "coffee -o lib/ -c src/ && npm publish",
+    "migrate": "./build-commit.sh --rebuild && cat build/latest/build.sql | psql $DATABASE_URL",
+    "reload": "plpl/bin/plpl reload",
     "test": "node_modules/mocha/bin/mocha.js --require mocha --require coffee-script/register --recursive \"test/**/*.coffee\""
   }
 }
