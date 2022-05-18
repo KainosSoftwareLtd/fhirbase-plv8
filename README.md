@@ -64,7 +64,7 @@ You will need to make changes to the fhirbase code from time to time. Here is ho
     npm install -g mocha && npm install -g coffee-script
     ```
 3. Implement required changes in the fhirbase coffee scripts and commit them. 
-4. It would be great if your changes in Coffee scripts had their unit tests. You can find a detailed instruction how to test below, in the chapter 
+4. It would be great if your changes in Coffee scripts had their unit tests. You can find a detailed instruction how to test below, in the [Testing chapter](#testing)
 5. Run the script `./build-commit.sh`. The script compiles the Coffee scripts and generates a bunch of SQL files from them in the `build/current-commit-hash` directory. The one that is the most interesting for us is the `code.sql`.
 6. The `code.sql` script contains some unnecessary comments and expressions creating modules using an your local absolute path where the repository is cloned, e.g. `_modules["/Users/bartlomiejs/work/fhirbase-plv8/src/core"]`. To clear the SQL file adjust and run the following command:
     ```shell script
