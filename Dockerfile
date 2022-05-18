@@ -63,8 +63,9 @@ RUN echo 'fhirbase ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 USER fhirbase
 
 RUN cd ~ \
-    && git clone https://github.com/fhirbase/fhirbase-plv8.git fhirbase \
+    && git clone git@github.com:KainosSoftwareLtd/fhirbase-plv8.git fhirbase \
     && cd ~/fhirbase \
+    && git switch gccg-develop \
     && git submodule update --init --recursive
 
 # Install nodejs.
