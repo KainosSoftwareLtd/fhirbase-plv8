@@ -51,8 +51,6 @@ Here is the list of PostgreSQL features that we use:
 
 You will need to make changes to the fhirbase code from time to time. Here is how you should perform update process.
 
-The original "Development Installation" chapter mentions that you should have node v6.2.0, however, it was tested that the installation process is successful on newer node versions (e.g. v12.18.0).
-
 1. Clone the repository and initialise its submodules:
     ```shell script
     git clone git@github.com:KainosSoftwareLtd/fhirbase-plv8.git
