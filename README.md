@@ -45,6 +45,13 @@ Here is the list of PostgreSQL features that we use:
 
 ## Installation
 
+---
+
+**You can find Kainos instructions for installation, development, testing and preparing a release of the fhirbase engine on the branches relevant to the specific project. E.g. instructions for the  JUYI / GCCG are located in the [`gccg_develop` branch](https://github.com/KainosSoftwareLtd/fhirbase-plv8/tree/gccg-develop).**
+
+---
+
+
 To install fhirbase you need postgresql-9.4 and plv8 extension.
 
 ```sh
