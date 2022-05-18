@@ -45,31 +45,7 @@ Here is the list of PostgreSQL features that we use:
 
 ## Installation
 
-To install fhirbase you need postgresql-9.4 and plv8 extension.
-
-```sh
-sudo apt-get install postgresql-contrib-9.4 postgresql-9.4-plv8  -qq -y
-psql -c "CREATE USER \"user\" WITH PASSWORD 'password'"
-psql -c 'CREATE DATABASE fhirbase;' -U user
-psql -c '\dt' -U postgres
-export DATABASE_URL=postgres://user:password@localhost:5432/fhirbase
-
-wget https://github.com/fhirbase/fhirbase-plv8/releases/download/v<version of the fhirbase>/fhirbase-<version of the fhirbase>.sql.zip
-unzip fhirbase-<version of the fhirbase>.sql.zip
-
-cat fhirbase-<version of the fhirbase>.sql | psql fhirbase
-```
-
-## Upgrade
-
-```sh
-export DATABASE_URL=postgres://user:password@localhost:5432/fhirbase
-
-wget https://github.com/fhirbase/fhirbase-plv8/releases/download/v<version of the fhirbase>/fhirbase-<version of the fhirbase>-patch.sql.zip
-unzip fhirbase-<version of the fhirbase>-patch.sql.zip
-
-cat fhirbase-<version of the fhirbase>-patch.sql | psql fhirbase
-```
+**You can find the original instructions for installation, development, testing and preparing a release of the fhirbase engine on the [`master` branch](https://github.com/KainosSoftwareLtd/fhirbase-plv8).**
 
 ## Kainos development and update process
 
@@ -79,8 +55,9 @@ The original "Development Installation" chapter mentions that you should have no
 
 1. Clone the repository and initialise its submodules:
     ```shell script
-    git clone https://github.com/fhirbase/fhirbase-plv8
+    git clone git@github.com:KainosSoftwareLtd/fhirbase-plv8.git
     cd fhirbase-plv8
+    git switch gccg-develop
     git submodule init && git submodule update
     ```
 2. Install dependencies:
@@ -88,9 +65,10 @@ The original "Development Installation" chapter mentions that you should have no
     cd plpl && npm install && cd .. && npm install
     npm install -g mocha && npm install -g coffee-script
     ```
-3. Implement required changes in the fhirbase coffee scripts and commit them.
-4. Run the script `./build-commit.sh`. The script compiles the Coffee scripts and generates a bunch of SQL files from them in the `build/current-commit-hash` directory. The one that is the most interesting for us is the `code.sql`.
-5. The `code.sql` script contains some unnecessary comments and expressions creating modules using an your local absolute path where the repository is cloned, e.g. `_modules["/Users/bartlomiejs/work/fhirbase-plv8/src/core"]`. To clear the SQL file adjust and run the following command:
+3. Implement required changes in the fhirbase coffee scripts and commit them. 
+4. It would be great if your changes in Coffee scripts had their unit tests. You can find a detailed instruction how to test below, in the chapter 
+5. Run the script `./build-commit.sh`. The script compiles the Coffee scripts and generates a bunch of SQL files from them in the `build/current-commit-hash` directory. The one that is the most interesting for us is the `code.sql`.
+6. The `code.sql` script contains some unnecessary comments and expressions creating modules using an your local absolute path where the repository is cloned, e.g. `_modules["/Users/bartlomiejs/work/fhirbase-plv8/src/core"]`. To clear the SQL file adjust and run the following command:
     ```shell script
     cat code.sql \
         | sed "s/\/Users\/bartlomiejs\/work//g" \
@@ -98,7 +76,7 @@ The original "Development Installation" chapter mentions that you should have no
         | sed "/\/\/# sourceURL.*/d" \
         >> clean-code.sql
     ```
-6. Copy the block of code that recreates `plv8_init` function
+7. Copy the block of code that recreates `plv8_init` function
     ```sql
     CREATE OR REPLACE FUNCTION plv8_init() RETURNS text AS $JAVASCRIPT$
     --
@@ -107,41 +85,41 @@ The original "Development Installation" chapter mentions that you should have no
     $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE STRICT;
     ```
     and place it as the new migration file (e.g. `V15_0_0__recreate_plv8init_with_fhir_extract_as_string_array_method_added.sql`) in the `fhir-service/db/schema/public` directory.
-7. Check the diff between the new migration file and the previous one updating `plv8_init` function and validate if all changes you applied in the coffee scripts have the corresponding code in the new migration.
-8. If everything is correct copy the migration file to the tenant migrations directory `fhir-service/db/schema/tenant`. Make sure you update the version number (`V15_0_0` part) so that it is the latest tenant migration version.
-9. If you have added a new coffee script function or updated the name of already existing one you should add a migration that creates a Postgresql function in both public and tenant schemas.
-   - Migration added to `fhir-service/db/schema/public` directory. Please, note that we are creating two functions that refer to the same coffee script function. The latter definition (with the `_withplv8` suffix) is a workaround for autovacuum issue and it will be used in the tenant migration. 
-        ```sql
-        DROP FUNCTION IF EXISTS fhir_extract_as_string_array(resource json, metas json) CASCADE;
-        CREATE OR REPLACE FUNCTION
-        fhir_extract_as_string_array(resource json, metas json)
-        RETURNS text[] AS $JAVASCRIPT$
-          var mod = require("/fhirbase-plv8/src/fhir/search_string.coffee")
-          return mod.fhir_extract_as_string_array(plv8, resource, metas)
-        $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE;
+8. Check the diff between the new migration file and the previous one updating `plv8_init` function and validate if all changes you applied in the coffee scripts have the corresponding code in the new migration.
+9. If everything is correct copy the migration file to the tenant migrations directory `fhir-service/db/schema/tenant`. Make sure you update the version number (`V15_0_0` part) so that it is the latest tenant migration version.
+10. If you have added a new coffee script function or updated the name of already existing one you should add a migration that creates a Postgresql function in both public and tenant schemas.
+    - Migration added to `fhir-service/db/schema/public` directory. Please, note that we are creating two functions that refer to the same coffee script function. The latter definition (with the `_withplv8` suffix) is a workaround for autovacuum issue and it will be used in the tenant migration. 
+         ```sql
+         DROP FUNCTION IF EXISTS fhir_extract_as_string_array(resource json, metas json) CASCADE;
+         CREATE OR REPLACE FUNCTION
+         fhir_extract_as_string_array(resource json, metas json)
+         RETURNS text[] AS $JAVASCRIPT$
+           var mod = require("/fhirbase-plv8/src/fhir/search_string.coffee")
+           return mod.fhir_extract_as_string_array(plv8, resource, metas)
+         $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE;
         
         
-        DROP FUNCTION IF EXISTS public.fhir_extract_as_string_array_withplv8(resource json, metas json) CASCADE;
-        CREATE OR REPLACE FUNCTION
-        public.fhir_extract_as_string_array_withplv8(resource json, metas json)
-        RETURNS text[] AS $JAVASCRIPT$
-          var mod = require("/fhirbase-plv8/src/fhir/search_string.coffee")
-          return mod.fhir_extract_as_string_array(plv8, resource, metas)
-        $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE;
-        ```
-   - Migration added to `fhir-service/db/schema/tenant` directory:
-        ```sql
-        DROP FUNCTION IF EXISTS fhir_extract_as_string_array(resource json, metas json) CASCADE;
-        CREATE OR REPLACE FUNCTION
-        fhir_extract_as_string_array(resource json, metas json)
-        RETURNS text[]
-         LANGUAGE sql
-         IMMUTABLE
-        AS $function$
-          SELECT set_config('plv8.start_proc', 'public.plv8_init', false);
-          SELECT public.fhir_extract_as_string_array_withplv8(resource, metas)
-        $function$;
-        ```  
+         DROP FUNCTION IF EXISTS public.fhir_extract_as_string_array_withplv8(resource json, metas json) CASCADE;
+         CREATE OR REPLACE FUNCTION
+         public.fhir_extract_as_string_array_withplv8(resource json, metas json)
+         RETURNS text[] AS $JAVASCRIPT$
+           var mod = require("/fhirbase-plv8/src/fhir/search_string.coffee")
+           return mod.fhir_extract_as_string_array(plv8, resource, metas)
+         $JAVASCRIPT$ LANGUAGE plv8 IMMUTABLE;
+         ```
+    - Migration added to `fhir-service/db/schema/tenant` directory:
+         ```sql
+         DROP FUNCTION IF EXISTS fhir_extract_as_string_array(resource json, metas json) CASCADE;
+         CREATE OR REPLACE FUNCTION
+         fhir_extract_as_string_array(resource json, metas json)
+         RETURNS text[]
+          LANGUAGE sql
+          IMMUTABLE
+         AS $function$
+           SELECT set_config('plv8.start_proc', 'public.plv8_init', false);
+           SELECT public.fhir_extract_as_string_array_withplv8(resource, metas)
+         $function$;
+         ```  
     
 **Note:** If you have changed a function that is used for creating indexes, you must regenerate those indexes.
 
@@ -155,45 +133,55 @@ The original "Development Installation" chapter mentions that you should have no
    - [Remove already existing XCode installation](https://medium.com/flawless-app-stories/gyp-no-xcode-or-clt-version-detected-macos-catalina-anansewaa-38b536389e8d)
    - Follow [one of the solutions](https://github.com/nodejs/node-gyp/blob/master/macOS_Catalina.md#solutions) provided by `node-gyp` maintainers. You can try with the second solution (reinstalling Xcode Command Line Tools) but in my case even if the "acid test" has passed `node-gyp` still didn't work, so be ready for the first solution, i.e. installing the full XCode and waiting a long time until it is downloaded.
 
-## Development Installation
+## Testing
 
-Development installation requires node v6.2.0 or newer
-and npm 3.0.0 or newer, which could be installed by [nvm][]:
+### Kainos custom testing process
 
-[nvm]: https://github.com/creationix/nvm
-
-```sh
-# install node < 0.12 by nvm for example
-sudo apt-get install postgresql-contrib-9.4 postgresql-9.4-plv8  -qq -y
-
-git clone https://github.com/fhirbase/fhirbase-plv8
-cd fhirbase-plv8
-git submodule init && git submodule update
-
-npm install && cd plpl && npm install
-npm install -g mocha && npm install -g coffee-script
-
-psql -c "CREATE USER fb WITH PASSWORD 'fb'"
-psql -c 'ALTER ROLE fb WITH SUPERUSER'
-psql -c 'CREATE DATABASE fhirbase;' -U postgres
-psql -c '\dt' -U postgres
-
-export DATABASE_URL=postgres://fb:fb@localhost:5432/fhirbase
-
-# build migrations
-coffee  utils/generate_schema.coffee -n  | psql fhirbase
-cat utils/patch_3.sql | psql fhirbase
-
-# change something
-# reload schema
-
-plpl/bin/plpl reload
-npm run test
-
-# goto: change something
-```
+1. Instead of using a Postgresql instance installed on your Mac (it may be tricky to configure and run without the sudo access), you can use the docker instance created for running the fhir service locally.
+    ```
+   cd evolve.velocity.fhir/fhir-service
+   docker compose up fhirdb
+   ```
+2. Proceed to the directory with cloned Kainos fhirbase-plv8 repository 
+3. Initialise submodules and install dependecies:
+    ```shell
+    git submodule init && git submodule update
+    cd plpl && npm install && cd .. && npm install
+    npm install -g mocha && npm install -g coffee-script
+    ```
+4. Prepare a test database:
+    ```shell
+    psql -h localhost -d fhirbase -U fhirbase -c "CREATE USER fb WITH PASSWORD 'fb'"
+    psql -h localhost -d fhirbase -U fhirbase -c 'ALTER ROLE fb WITH SUPERUSER'
+    psql -h localhost -d fhirbase -U fhirbase -c 'CREATE DATABASE fhirbase_plv8;
+   ```
+5. Add the line below to you `~/.pgpass` file:
+    ```
+   localhost:5432:*:fb:fb
+   ```
+6. Check the connection:
+    ```shell
+   psql -h localhost -d fhirbase_plv8 -U fb -c '\dt'
+   ```
+7. Set up database URL environment variable
+    ```shell
+    export DATABASE_URL=postgres://fb:fb@localhost:5432/fhirbase_plv8
+    ```
+8. Build migrations:
+    ```shell
+    coffee utils/generate_schema.coffee -n | psql -h localhost -d fhirbase_plv8 -U fb
+    ```
+9. Change something
+10. reload schema
+    ```shell
+    plpl/bin/plpl reload
+    npm run test
+    ```
+11. goto: change something
 
 ## Run test suite in docker container
+
+**Kainos comment: Running test as below doesn't work.**
 
 ```sh
 git clone https://github.com/fhirbase/fhirbase-plv8 fhirbase
