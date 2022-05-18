@@ -151,7 +151,7 @@ You will need to make changes to the fhirbase code from time to time. Here is ho
     ```shell
     psql -h localhost -d fhirbase -U fhirbase -c "CREATE USER fb WITH PASSWORD 'fb'"
     psql -h localhost -d fhirbase -U fhirbase -c 'ALTER ROLE fb WITH SUPERUSER'
-    psql -h localhost -d fhirbase -U fhirbase -c 'CREATE DATABASE fhirbase_plv8;
+    psql -h localhost -d fhirbase -U fhirbase -c 'CREATE DATABASE fhirbase_plv8'
    ```
 5. Add the line below to you `~/.pgpass` file:
     ```
