@@ -7,6 +7,14 @@ params:
         elementType: 'HumanName'
         pathUsage: "normal"
         multiple: true
+  - query: ["Practitioner",["extension",["url","http://hl7.org/fhir/StructureDefinition/Practitioner-contact-display"]],"valueString"]
+    result:
+      - searchType: 'string'
+        path: ["Practitioner",["extension",["url","http://hl7.org/fhir/StructureDefinition/Practitioner-contact-display"]],"valueString"]
+        name: 'valueString'
+        elementType: 'string'
+        pathUsage: "normal"
+        multiple: true
 elements:
   - query: ['Patient', 'contact', 'relationship']
     result:
@@ -46,4 +54,10 @@ elements:
       max : '1'
       isSummary : true
       type : [ { code : 'dateTime' } ]
+      elements : {  }
+  - query: ["Practitioner", "extension", "valueString"]
+    result:
+      path : 'Extension.value[x]'
+      max : '1'
+      type : [ { code : 'string' } ]
       elements : {  }
