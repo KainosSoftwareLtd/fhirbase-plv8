@@ -44670,6 +44670,21 @@
         "xpath": "f:DataElement/f:element/f:mapping/f:extension[@url='http://hl7.org/fhir/StructureDefinition/11179-objectClassProperty'] | f:DataElement/f:element/f:mapping/f:extension[@url='http://hl7.org/fhir/StructureDefinition/11179-objectClassProperty']",
         "xpathUsage": "normal"
       }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/SearchParameter/Practitioner-system-patient-id",
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "Practitioner-system-patient-id",
+        "url": "http://hl7.org/fhir/SearchParameter/Practitioner-system-patient-id",
+        "name": "system-patient-id",
+        "code": "system-patient-id",
+        "base": "Practitioner",
+        "type": "string",
+        "description": "ID of a system patient for which the practitioner resource was generated",
+        "xpath": "f:Practitioner/f:extension[@url='http://hl7.org/fhir/StructureDefinition/Practitioner-system-patient-id']/f:valueString | f:Practitioner/f:extension[@url='http://hl7.org/fhir/StructureDefinition/Practitioner-system-patient-id']/f:valueString",
+        "xpathUsage": "normal"
+      }
     }
   ]
 }
