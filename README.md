@@ -141,7 +141,7 @@ You will need to make changes to the fhirbase code from time to time. Here is ho
    docker compose up fhirdb
    ```
 2. Proceed to the directory with cloned Kainos fhirbase-plv8 repository 
-3. Initialise submodules and install dependecies:
+3. Initialise submodules and install dependencies:
     ```shell
     git submodule init && git submodule update
     cd plpl && npm install && cd .. && npm install
