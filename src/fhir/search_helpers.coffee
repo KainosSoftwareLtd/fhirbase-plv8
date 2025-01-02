@@ -27,7 +27,7 @@ exports.search_links = (query, expr, total)->
     res.push({relation: 'previous', url: next_url})
 
   if requested_count
-    last_page = Math.max(0, Math.ceil(Number(total) / Number(requested_count)) - 1);
+    last_page = Math.max(0, Math.ceil(Number(total) / Number(requested_count)) - 1)
     last_url = base_url.replace /_page=\d+/, -> "_page=#{last_page}"
     res.push({relation: 'last', url: last_url})
 
