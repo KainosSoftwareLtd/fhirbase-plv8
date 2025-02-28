@@ -129,7 +129,7 @@ Then we are returning  resulting Bundle.
       if should_include_total
         resourceType: 'Bundle'
         type: 'searchset'
-        total: count
+        total: Number(count)
         link: helpers.search_links(query, expr, count)
         entry: resources.map(to_entry)
       else

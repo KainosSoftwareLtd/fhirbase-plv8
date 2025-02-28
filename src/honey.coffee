@@ -253,11 +253,11 @@ BUILTINS =
     res.push(")::#{name(tp)}")
   $json: (res, [op, json])->
     res.push("(")
-    res.add_param(JSON.stringify(json))
+    res.add_param(json)
     res.push(")::json")
   $jsonb: (res, [op, json])->
     res.push("(")
-    res.add_param(JSON.stringify(json))
+    res.add_param(json)
     res.push(")::jsonb")
   $asc: (res, [op, expr])->
     heval(res, expr)
