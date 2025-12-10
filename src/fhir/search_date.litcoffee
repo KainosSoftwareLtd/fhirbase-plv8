@@ -79,7 +79,7 @@ Now we support only simple date data-types - i.e. date, dateTime and instant.
         extract_value = convert_value(plv8, value.toString())
         res = utils.exec plv8,
           select: sql.raw("extract(epoch from ('#{extract_value}')::timestamp with time zone)")
-        res[0].date_part
+        res[0].extract
       else
         null
 
